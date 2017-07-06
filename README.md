@@ -1,6 +1,6 @@
-== Milonga creada para bajar series 720 de argenteam
+## Milonga creada para bajar series 720 de argenteam
 
-==== El script da la sgte prioridad
+#### El script da la sgte prioridad
 1) 720 + subtitulo
 2) 720
 3) no-720 + subtitulo
@@ -17,15 +17,17 @@ user: ''  # default admin
 pass: ''  # default admin
 ```
 
-= Uso
+# Uso
 ```ruby
-serie = Serie.search('Serie a ver')
+$ irb
+require './manso_script'
+serie # Serie.search('Serie a ver')
 
 series.seasons[indice].download # de querer solo 1 temporada especifica
 series.download  # de querer toda la serie enterota
 ```
 
-== TODO:
+## TODO:
 - darle forma de gema
 - hacerla gema
 - milonguear

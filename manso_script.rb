@@ -149,6 +149,7 @@ class Episode < Base
   end
 
   def fetch
+    puts "Fetching #{to_s}"
     self.releases = self.class.fetch(id).releases
   end
 
