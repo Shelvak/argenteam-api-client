@@ -21,7 +21,7 @@ pass: ''  # default admin
 ```ruby
 $ irb
 require './manso_script'
-serie # Serie.search('Serie a ver')
+serie = Serie.search('Serie a ver')
 
 series.seasons[indice].download # de querer solo 1 temporada especifica
 series.download  # de querer toda la serie enterota
