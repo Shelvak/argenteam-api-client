@@ -19,6 +19,7 @@ pass: ''  # default admin
 
 # Uso
 ```ruby
+$ bundle
 $ irb
 require './manso_script'
 serie = Serie.search('Serie a ver')
