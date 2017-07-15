@@ -1,11 +1,15 @@
-require 'byebug'
+# Ruby stlib
 require 'json'
 require 'net/http'
 require 'ostruct'
-require 'transmission'
 require 'yaml'
+# Vendor
+require 'transmission'
 
 class Base
+
+  $lib_path = File.expand_path('afip_service', 'lib')
+
   def self.site
     'http://argenteam.net/api/v1/'
   end
@@ -106,6 +110,7 @@ class Serie < Base
               else
                 show_series(r)
             end
+    return unless serie
     new(find(serie.id))
   end
 
@@ -134,7 +139,7 @@ class Episode < Base
 
   def initialize(attrs)
     @id = attrs.id.to_i
-    @number = attrs.number.to_i
+    @number = attrs.number
     @season = attrs.season.to_i
     @title = attrs.title
     @releases = attrs.releases
@@ -234,7 +239,7 @@ class Torrent
   end
 
   def self.init_client
-    config = YAML.load(File.read(File.dirname(__FILE__) + '/config.yml'))
+    config = YAML.load(File.read($GEM_ROOT + '/config.yml'))
     config[:host] = config['host'] || '127.0.0.1'
     config[:port] = config['port'] || 9091
     config[:user] = config['user'] || 'admin'

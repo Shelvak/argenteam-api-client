@@ -23,6 +23,7 @@ GEM
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
     ntlm-http (0.1.1)
+    rake (12.0.0)
     transmission-ng (1.0.10)
       mechanize (~> 2.7)
     unf (0.1.4)
@@ -35,7 +36,8 @@ PLATFORMS
 
 DEPENDENCIES
   byebug
+  rake
   transmission-ng
 
 BUNDLED WITH
-   1.13.2
+   1.15.1
