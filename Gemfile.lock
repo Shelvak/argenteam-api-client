@@ -1,6 +1,7 @@
 GEM
+  remote: https://rubygems.org/
   specs:
-    byebug (9.0.6)
+    byebug (9.1.0)
     domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
     http-cookie (1.0.3)
@@ -17,13 +18,13 @@ GEM
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
-    mini_portile2 (2.2.0)
+    mini_portile2 (2.3.0)
     net-http-digest_auth (1.4.1)
     net-http-persistent (2.9.4)
-    nokogiri (1.8.0)
-      mini_portile2 (~> 2.2.0)
+    nokogiri (1.8.1)
+      mini_portile2 (~> 2.3.0)
     ntlm-http (0.1.1)
-    rake (12.0.0)
+    rake (12.3.0)
     transmission-ng (1.0.10)
       mechanize (~> 2.7)
     unf (0.1.4)
@@ -40,4 +41,4 @@ DEPENDENCIES
   transmission-ng
 
 BUNDLED WITH
-   1.15.1
+   1.16.0

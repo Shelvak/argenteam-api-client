@@ -63,12 +63,13 @@ class Season
 
   def find_720_torrent
     episodes.each do |e|
-      if (t = e.find_720_torrent)
+      if e.find_720_torrent
         puts "Encontrado #{e.to_s}"
         @episodes_with_720 << e.id
       end
     end
 
+    byebug
     episodes.size == @episodes_with_720.size
   end
 
@@ -220,7 +221,7 @@ class Episode < Base
   def add_torrent_from_release(release)
     t = release.torrents.first
     if t
-      puts "Adding #{to_s} torrent"
+      puts "Agregando #{to_s} torrent"
       Torrent.add(t.alt || t.uri)  # ensure always we add the magnet
     end
   end
@@ -231,7 +232,9 @@ class Torrent
   def self.add(link)
     init_client unless @@_client
 
-    client.add_magnet(link)
+    # client.add doesn't return true for duplicated
+    response = client.send(:rpc, 'torrent-add', {'filename' => link})
+    response['result'] == 'success'
   end
 
   def self.client
