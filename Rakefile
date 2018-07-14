@@ -26,9 +26,6 @@ task :run do
     puts "La serie tiene #{serie.seasons.size} temporadas, cuál bajamos?"
     puts '[0] Completa (Default)'
     serie.seasons.each_with_index do |season, i|
-      if i == 5
-        byebug
-      end
       puts "[#{i+1}] Temporada #{i+1} (Episodios: #{season.episodes.size})"
     end
     choise = gets.chomp.to_i
