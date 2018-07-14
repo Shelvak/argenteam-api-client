@@ -19,21 +19,27 @@ task :run do
     exit 0
   end
 
+  return 'Sin transmission no hay joda...' unless Torrent.healthcheck
+
   if serie.seasons.size == 1
     puts 'Solo tiene 1 temporada, descargando...'
     serie.download
-  else
-    puts "La serie tiene #{serie.seasons.size} temporadas, cuál bajamos?"
-    puts '[0] Completa (Default)'
-    serie.seasons.each_with_index do |season, i|
-      puts "[#{i+1}] Temporada #{i+1} (Episodios: #{season.episodes.size})"
-    end
-    choise = gets.chomp.to_i
-
-    if choise == 0
-      serie.download
-    else
-      serie.seasons[choise - 1].download
-    end
+    exit 0
   end
+
+  puts "La serie tiene #{serie.seasons.size} temporadas, cuál bajamos?"
+  puts '(Multiples separadas por coma)'
+  puts '[0] Completa (Default)'
+  serie.seasons.each_with_index do |season, i|
+    n = i+1
+    puts "[#{n}] Temporada #{n} (Episodios: #{season.episodes.size})"
+  end
+  choises = gets.chomp.to_s.split(',').map(&:to_i).sort
+
+  if choises.include?(0)
+    serie.download
+    exit 0
+  end
+
+  choises.each { |i| serie.seasons[i-1].download }
 end

@@ -240,6 +240,13 @@ class Torrent
     @@_client
   end
 
+  def self.healthcheck
+    init_client unless @@_client
+    client.session_get
+  rescue
+    false
+  end
+
   def self.init_client
     config = YAML.load(File.read($GEM_ROOT + '/config.yml'))
     config[:host] = config['host'] || '127.0.0.1'
