@@ -69,7 +69,6 @@ class Season
       end
     end
 
-    byebug
     episodes.size == @episodes_with_720.size
   end
 
