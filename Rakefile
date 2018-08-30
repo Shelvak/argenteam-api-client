@@ -19,7 +19,10 @@ task :run do
     exit 0
   end
 
-  return 'Sin transmission no hay joda...' unless Torrent.healthcheck
+  unless Torrent.healthcheck
+    puts 'Sin transmission no hay joda...'
+    exit 0
+  end
 
   if serie.seasons.size == 1
     puts 'Solo tiene 1 temporada, descargando...'
