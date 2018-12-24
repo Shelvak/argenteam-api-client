@@ -52,19 +52,31 @@ class Season
   def initialize(attrs)
     @season = attrs.season
     @episodes = attrs.episodes.map { |e| e.season = attrs.season; Episode.new(e) }
+    @episodes_with_1080 = []
     @episodes_with_720 = []
   end
 
-  def download
-    episodes.each(&:parse_torrents)
+  def download(quality)
+    episodes.each { |e| e.parse_torrents }
 
-    find_720_torrent || find_pija_quality_torrent
+    (find_1080_torrent if quality == 1080) || find_720_torrent || find_standard_quality_torrent
+  end
+
+  def find_1080_torrent
+    episodes.each do |e|
+      if e.find_1080_torrent
+        @episodes_with_1080 << e.id
+      end
+    end
+
+    episodes.size == @episodes_with_1080.size
   end
 
   def find_720_torrent
     episodes.each do |e|
+      next if @episodes_with_1080.include?(e.id)
+
       if e.find_720_torrent
-        puts "Encontrado #{e.to_s}"
         @episodes_with_720 << e.id
       end
     end
@@ -72,13 +84,12 @@ class Season
     episodes.size == @episodes_with_720.size
   end
 
-  def find_pija_quality_torrent
-
+  def find_standard_quality_torrent
     episodes.each do |e|
-      unless @episodes_with_720.include?(e.id)
-        puts "Buscando pija_quality_torrents para #{e.to_s}"
-        e.find_pija_quality_torrent
-      end
+      next if @episodes_with_720.include?(e.id)
+
+      puts "Buscando SD_torrents para #{e.to_s}"
+      e.find_standard_quality_torrent
     end
   end
 end
@@ -129,8 +140,8 @@ class Serie < Base
     seasons.map(&:episodes).flatten
   end
 
-  def download
-    seasons.map(&:download)
+  def download(quality)
+    seasons.map { |s| s.download quality }
   end
 end
 
@@ -143,9 +154,12 @@ class Episode < Base
     @season = attrs.season.to_i
     @title = attrs.title
     @releases = attrs.releases
+
+    @torrents_with_1080 = []
+    @torrents_with_1080_and_subs = []
+    @torrents_with_720 = []
     @torrents_with_720_and_subs = []
     @torrents_with_subs = []
-    @torrents_with_720 = []
     @torrents = []
   end
 
@@ -163,9 +177,15 @@ class Episode < Base
     fetch
     releases.map do |r|
       next unless r.torrents.first
-      subs = r.subtitles.size > 0
-      _720 = r.tags.match(/720/)
+
+      subs  = r.subtitles.size > 0
+      _720  = r.tags.match(/720/)
+      _1080 = r.tags.match(/1080/)
       case
+        when subs && _1080
+          @torrents_with_1080_and_subs << r
+        when _1080
+          @torrents_with_1080 << r
         when subs && _720
           @torrents_with_720_and_subs << r
         when _720
@@ -178,15 +198,16 @@ class Episode < Base
     end
   end
 
-  def find_pija_quality_torrent
+
+  def find_1080_torrent
     r = case
-          when @torrents_with_subs.size > 0
-            choose_between_releases(@torrents_with_subs)
-          when @torrents.size > 0
-            choose_between_releases(@torrents)
+          when @torrents_with_1080_and_subs.size > 0
+            choose_between_releases(@torrents_with_1080_and_subs)
+          when @torrents_with_1080.size > 0
+            choose_between_releases(@torrents_with_1080)
         end
 
-    r ? add_torrent_from_release(r) : (puts "No hay torrents para #{to_s}")
+    r ? add_torrent_from_release(r) : (puts "No hay torrents 1080 para #{to_s}")
   end
 
   def find_720_torrent
@@ -198,6 +219,17 @@ class Episode < Base
         end
 
     r ? add_torrent_from_release(r) : (puts "No hay torrents 720 para #{to_s}")
+  end
+
+  def find_standard_quality_torrent
+    r = case
+          when @torrents_with_subs.size > 0
+            choose_between_releases(@torrents_with_subs)
+          when @torrents.size > 0
+            choose_between_releases(@torrents)
+        end
+
+    r ? add_torrent_from_release(r) : (puts "No hay torrents para #{to_s}")
   end
 
   def choose_between_releases(releases)
