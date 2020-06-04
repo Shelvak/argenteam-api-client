@@ -26,7 +26,7 @@ GEM
     nokogiri (1.8.4)
       mini_portile2 (~> 2.3.0)
     ntlm-http (0.1.1)
-    rake (12.3.1)
+    rake (12.3.3)
     transmission-ng (1.0.10)
       mechanize (~> 2.7)
     unf (0.1.4)
