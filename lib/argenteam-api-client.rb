@@ -54,6 +54,7 @@ class Season
     @episodes = attrs.episodes.map { |e| e.season = attrs.season; Episode.new(e) }
     @episodes_with_1080 = []
     @episodes_with_720 = []
+    @already_downloaded = []
   end
 
   def download(quality)
@@ -66,6 +67,7 @@ class Season
     episodes.each do |e|
       if e.find_1080_torrent
         @episodes_with_1080 << e.id
+        @already_downloaded << e.short
       end
     end
 
@@ -74,7 +76,9 @@ class Season
 
   def find_720_torrent
     episodes.each do |e|
-      next if @episodes_with_1080.include?(e.id)
+      if @episodes_with_1080.include?(e.id) || @already_downloaded.include?(e.short)
+        next
+      end
 
       if e.find_720_torrent
         @episodes_with_720 << e.id
@@ -86,7 +90,7 @@ class Season
 
   def find_standard_quality_torrent
     episodes.each do |e|
-      next if @episodes_with_720.include?(e.id)
+      next if @episodes_with_720.include?(e.id) || @already_downloaded.include?(e.short)
 
       puts "Buscando SD_torrents para #{e.to_s}"
       e.find_standard_quality_torrent
@@ -165,6 +169,10 @@ class Episode < Base
 
   def to_s
     "[#{season.to_s.rjust(2, '0')}x#{number.to_s.rjust(2, '0')}] #{title}"
+  end
+
+  def short
+    "#{season.to_s.rjust(2, '0')}x#{number.to_s.rjust(2, '0')}"
   end
 
   def fetch

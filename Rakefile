@@ -34,7 +34,7 @@ task :run do
   puts 'Qué calidad?'
   puts '[0] 1080'
   puts '[1] 720'
-  quality = gets.chomp.match?(/720/) ? 720 : 1080
+  quality = gets.chomp.match?(/(720|1)/) ? 720 : 1080
 
   puts "#{serie.title} en #{quality} seleccionada."
   separator
