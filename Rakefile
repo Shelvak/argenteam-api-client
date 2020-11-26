@@ -39,9 +39,26 @@ task :run do
   puts "#{serie.title} en #{quality} seleccionada."
   separator
 
+  puts 'Bajar solo la serie [0], solos los subtitulos[1], o los [2]?'
+  chapters, subs = case gets.chomp.to_i
+                   when 1
+                     [false, true]
+                   when 2
+                     [true, true]
+                   else
+                     [true, false]
+                   end
+
+  if subs
+    puts 'Donde bajamos los subtitulos?'
+
+    $SUBS_PATH = gets.chomp.strip
+  end
+
   if serie.seasons.size == 1
     puts 'Solo tiene 1 temporada, descargando...'
-    serie.download(quality)
+    serie.download(quality) if chapters
+    serie.download_subtitles(quality) if subs
     exit 0
   end
 
@@ -57,9 +74,13 @@ task :run do
   separator
 
   if choises.include?(0)
-    serie.download(quality)
+    serie.download(quality) if chapters
+    serie.download_subtitles(quality) if subs
     exit 0
   end
 
-  choises.each { |i| serie.seasons[i-1].download(quality) }
+  choises.each do |i|
+    serie.seasons[i-1].download(quality) if chapters
+    serie.seasons[i-1].download_subtitles(quality) if subs
+  end
 end

@@ -7,15 +7,12 @@ require 'yaml'
 require 'transmission'
 
 class Base
-
-  $lib_path = File.expand_path('afip_service', 'lib')
-
   def self.site
-    'http://argenteam.net/api/v1/'
+    'https://argenteam.net/api/v1/'
   end
 
   def self.query(q)
-    requestaso(site + "search?q=#{q.strip}&type=#{self.name}").results
+    requestaso(site + "search?q=#{CGI.escape(q.strip)}&type=#{self.name}").results
   end
 
   def self.find(id)
@@ -61,6 +58,14 @@ class Season
     episodes.each { |e| e.parse_torrents }
 
     (find_1080_torrent if quality == 1080) || find_720_torrent || find_standard_quality_torrent
+  end
+
+  def download_subtitles(quality)
+    episodes.each do |e|
+      # That is skipped if already called
+      e.parse_torrents
+      e.download_subtitle_for_quality quality
+    end
   end
 
   def find_1080_torrent
@@ -147,10 +152,14 @@ class Serie < Base
   def download(quality)
     seasons.map { |s| s.download quality }
   end
+
+  def download_subtitles(quality)
+    seasons.map { |s| s.download_subtitles quality }
+  end
 end
 
 class Episode < Base
-  attr_accessor :id, :number, :season, :title, :releases
+  attr_accessor :id, :number, :season, :title, :releases, :added
 
   def initialize(attrs)
     @id = attrs.id.to_i
@@ -189,6 +198,7 @@ class Episode < Base
       subs  = r.subtitles.size > 0
       _720  = r.tags.match(/720/)
       _1080 = r.tags.match(/1080/)
+
       case
         when subs && _1080
           @torrents_with_1080_and_subs << r
@@ -205,7 +215,6 @@ class Episode < Base
       end
     end
   end
-
 
   def find_1080_torrent
     r = case
@@ -258,10 +267,26 @@ class Episode < Base
   end
 
   def add_torrent_from_release(release)
-    t = release.torrents.first
-    if t
+    self.added = release.torrents.first
+    if added
       puts "Agregando #{to_s} torrent"
-      Torrent.add(t.alt || t.uri)  # ensure always we add the magnet
+      Torrent.add(added.alt || added.uri)  # ensure always we add the magnet
+    end
+  end
+
+  def download_subtitle_for_quality(quality)
+    release   = added
+    release ||= if quality == 1080
+              @torrents_with_1080_and_subs.find {|r| r.subtitles.first }
+            end
+    release ||= @torrents_with_720_and_subs.find {|r| r.subtitles.first }
+    release ||= @torrents_with_subs.find {|r| r.subtitles.first }
+    release ||= releases.find { |r| r.subtitles.first } # emule
+
+    if (url = release&.subtitles&.first&.uri)
+      file_name = url.to_s.split('/').last
+      puts "Bajando subtitulo..."
+      `wget -q #{url} -O /tmp/#{file_name}.zip && cd #{$SUBS_PATH} && unzip -o /tmp/#{file_name}.zip && rm /tmp/#{file_name}.zip`
     end
   end
 end
